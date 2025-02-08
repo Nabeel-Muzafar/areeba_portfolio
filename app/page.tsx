@@ -9,6 +9,10 @@ import { ArrowRight, Play, Award, Users, Mail } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
 import emailjs from "@emailjs/browser"
+import { projects, Project } from "./data/projects"
+import { ProjectModal } from "./components/project-modal"
+
+
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -33,6 +37,15 @@ export default function Home() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  // const portfolio = [
+  //   {
+  //     title: "1",
+  //     category: CATEGORY["3D"],
+  //     thumnail: "/",
+  //     video_url: "/"
+  //   }
+  // ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -70,32 +83,11 @@ export default function Home() {
     }
   }
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 fixed top-0 w-full border-b">
-        <div className="container flex h-16 items-center justify-between mx-auto">
-          <Link href="/" className="font-bold text-2xl gradient-text">
-            Areeba Nabeel
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="#about" className="text-muted-foreground hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="#portfolio" className="text-muted-foreground hover:text-primary transition-colors">
-              Portfolio
-            </Link>
-            <Link href="#skills" className="text-muted-foreground hover:text-primary transition-colors">
-              Skills
-            </Link>
-            <Link href="#contact" className="text-muted-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
-          </nav>
-          <Link href={"https://www.upwork.com/freelancers/~01451f5a56fe23e261?referrer_url_path=%2Fnx%2Fsearch%2Ftalent%2Fdetails%2F~01451f5a56fe23e261%2Fprofile"}><Button>Hire Me</Button></Link>
-        </div>
-      </header>
+    <div className="mx-auto">
 
-      <main className="flex-grow mx-auto">
-        <section className="py-24 md:py-32 bg-gradient-to-b from-background via-background to-muted">
+
+      <main className="flex-grow ">
+        <section className="px-8 py-24 md:py-32 bg-gradient-to-b from-background via-background to-muted">
           <motion.div
             className="container flex flex-col md:flex-row items-center justify-between gap-8"
             initial="initial"
@@ -202,7 +194,7 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section id="portfolio" className="py-16 md:py-24 bg-muted">
+        <section id="portfolio" className="px-4 py-8 md:py-8 bg-muted">
           <motion.div
             className="container"
             initial="initial"
@@ -214,24 +206,24 @@ export default function Home() {
               Featured Projects
             </motion.h2>
             <motion.div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" variants={stagger}>
-              {[1, 2, 3, 4, 5, 6].map((project) => (
-                <motion.div key={project} variants={fadeIn}>
+              {projects.map((project) => (
+                project.type === "Featured" && <motion.div key={project.id} variants={fadeIn}>
                   <Card className="overflow-hidden group">
                     <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
                       <Image
-                        src={`/placeholder.svg?height=300&width=400`}
-                        alt={`Project ${project}`}
+                        src={project.thumbnail || "/placeholder.svg"}
+                        alt={project.title}
                         width={400}
                         height={300}
                         className="w-full h-48 object-cover transition-transform group-hover:scale-110"
                       />
                     </motion.div>
                     <CardContent className="p-4">
-                      <h3 className="text-xl font-bold mb-2">Project Title {project}</h3>
-                      <p className="text-muted-foreground mb-4">Short project description goes here.</p>
-                      <div className="flex justify-between items-center">
-                        <Badge variant="secondary">Category</Badge>
-                        <Button variant="outline" size="sm">
+                      <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                      <p className="text-muted-foreground mb-4 h-[70px]">{project.description}</p>
+                      <div className="flex justify-between  items-center">
+                        <Badge variant="secondary">{project.category}</Badge>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedProject(project)}>
                           View Project
                         </Button>
                       </div>
@@ -241,10 +233,11 @@ export default function Home() {
               ))}
             </motion.div>
             <motion.div className="text-center mt-12" variants={fadeIn}>
-              <Button size="lg">
+              <Link href={'/portfolio'}><Button size="lg">
                 View All Projects
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+              </Link>
             </motion.div>
           </motion.div>
         </section>
@@ -377,22 +370,8 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-background py-8 mx-auto">
-        <div className="container text-center">
-          <p className="text-muted-foreground">© {new Date().getFullYear()} Areeba Nabeel. All rights reserved.</p>
-          {/* <div className="mt-4 flex justify-center space-x-4">
-            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-              Twitter
-            </Link>
-            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-              LinkedIn
-            </Link>
-            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-              Instagram
-            </Link>
-          </div> */}
-        </div>
-      </footer>
+
+      <ProjectModal project={selectedProject} isOpen={!!selectedProject} onClose={() => setSelectedProject(null)} />
     </div>
   )
 }
